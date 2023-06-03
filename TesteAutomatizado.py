@@ -1,102 +1,102 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.service import Service
-import time
+from time import sleep
 
-servico = Service(ChromeDriverManager().install())
-navegador = webdriver.Chrome(service=servico)
-
-identificacao = [
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input', #nome
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input', #sobrenome
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input', #data nascimento
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[4]/input'  #cpf
-]
-contato = [
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input', #email
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input', #telefone 1
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input'  #telefone 2
-]
-endereco = [
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input', #logradouro
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input', #numero
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input', #bairro
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[4]/input', #cep
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[5]/input', #cidade
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[6]/select' #uf
-]
-usuario = [
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input', #nome
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input', #senha
-    '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input'  #conformar senha
-]
-carteira = [
-    '//*[@id="root"]/div/div/div[1]/div[2]/form/label[3]', #boleto
-    '//*[@id="root"]/div/div/div[1]/div[2]/form/label[4]/input' #pix
-]
-proximo = '//*[@id="root"]/div/div/div[2]/div/div[2]/div/button'
-
-
+chrome_service = Service(ChromeDriverManager().install()) #Instala a versão mais recente do drive
+chrome_options = ChromeOptions()    #Permite configurar o driver do chrome
+chrome_options.add_experimental_option("detach", True) #Este metodo impede que o navegador seja fechado apos o fim das intruções
+navegador = webdriver.Chrome(options=chrome_options, service=chrome_service) #Intancia um navegador
 navegador.get('http://localhost:3000')
+navegador.maximize_window()
 
-#-- Teste area de identificação 
-#Nome 
-navegador.find_element('xpath', identificacao[0]).send_keys('Mario')
-#Sobrenome
-navegador.find_element('xpath', identificacao[1]).send_keys('Da Silva Melo')
-#Data Nascimento
-navegador.find_element('xpath', identificacao[2]).send_keys('15052023')
-#CPF
-navegador.find_element('xpath', identificacao[3]).send_keys('08777777777')
-#Botão Proximo
-navegador.find_element('xpath', proximo).click() 
 
-time.sleep(2)
+def cadastroSucesso(transicao):
+    #Mapeamento dos formularios por xpath com valores injetado
+    cadastre_se = {
+        '//*[@id="root"]/div/div/div/div[2]/a[1]': ''
+    }
+    formularioIdentificacao = {
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input': 'Mario',  
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input': 'Da Silva Melo', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input': '15052023', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[4]/input': '08777777777'  
+    }
+    formularioContato = {
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input': 'mario@gmail.com', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input': '43999999999', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input': ''  
+    }
+    forumularioEndereco = {
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input': 'Rua Leonor Fraga Furlan', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input': '37', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input': 'Bairro Luigi Amoreze', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[4]/input': '47850059', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[5]/input': 'Londrina',
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[6]/select': 'Párana' 
+    }
+    forumularioUsuario = {
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[1]/input': 'Mario_02', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[2]/input': '@#1$bFs8', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/label[3]/input': '@#1$bFs8'  
+    }
+    formularioCarteira = {
+        '//*[@id="root"]/div/div/div[1]/div[2]/form/label[3]': '', 
+        '//*[@id="root"]/div/div/div[1]/div[2]/form/label[4]/input': ''
+    }
+    confirmar = {
+        '//*[@id="root"]/div/div/div[2]/div/div[2]/div/button': ''
+    }
+    cadastro = [
+        cadastre_se,
+        formularioIdentificacao, 
+        formularioContato, 
+        forumularioEndereco, 
+        forumularioUsuario,
+        formularioCarteira,
+        confirmar
+    ]
+    proximo = '//*[@id="root"]/div/div/div[2]/div/div[2]/div/button'
+    for formulario in cadastro:
+        for chave, valor in formulario.items():
+            if valor != '': 
+                sleep(transicao)
+                navegador.find_element('xpath', chave).send_keys(valor)
+            else:
+                sleep(transicao)
+                navegador.find_element('xpath', chave).click()
+        navegador.find_element('xpath', proximo).click() 
+    navegador.keyDown('Home')
 
-#-- Teste area de Contato  
-#Email 
-navegador.find_element('xpath', contato[0]).send_keys('mario@gmail.com')
-#Telefone1  
-navegador.find_element('xpath', contato[1]).send_keys('43999999999')
-#Telefone2  
-navegador.find_element('xpath', contato[2]).send_keys('43999997777')
-#Botão Proximo
-navegador.find_element('xpath', proximo).click() 
 
-time.sleep(2)
+def login(transicao):
+    navegador.find_element('xpath', '//*[@id="root"]/div/div/div/div[2]/label[1]/input').send_keys("mario@gmail.com")
+    sleep(transicao)
+    navegador.find_element('xpath', '//*[@id="root"]/div/div/div/div[2]/label[2]/input').send_keys("@#1$bFs8")
+    sleep(transicao)
+    navegador.find_element('xpath', '//*[@id="root"]/div/div/div/div[2]/button').click()
 
-#-- Teste area de Endereço  
-#Logradouro 
-navegador.find_element('xpath', endereco[0]).send_keys('Rua Leonor Fraga Furlan')
-#Número  
-navegador.find_element('xpath', endereco[1]).send_keys('37')
-#Bairro  
-navegador.find_element('xpath', endereco[2]).send_keys('Birro Luigi Amoreze')
-#CEP
-navegador.find_element('xpath', endereco[3]).send_keys('47850059')
-#Cidade
-navegador.find_element('xpath', endereco[4]).send_keys('Londrina')
-#UF
-navegador.find_element('xpath', endereco[5]).send_keys('Párana')
-#Botão Proximo
-navegador.find_element('xpath', proximo).click() 
 
-time.sleep(2)
 
-#-- Teste area de Usuário  
-#Nome/Apelido 
-navegador.find_element('xpath', usuario[0]).send_keys('Mario_02')
-#Senha 
-navegador.find_element('xpath', usuario[1]).send_keys('0@#rBdr')
-#Confirmar Senha  
-navegador.find_element('xpath', usuario[2]).send_keys('0@#rBdr')
-#Botão Proximo
-navegador.find_element('xpath', proximo).click() 
+def menu(): 
+    print("\n"*6)
+    print(' {}'.format('_'*60))
+    print('|{0:^60}|'.format('Programa de testes de casos de uso'))
+    print('|{}|'.format('-'*60))
+    print('|{0:<60}|'.format(' Escolha uma das opções')) 
+    print('|{}|'.format('-'*60))
+    print('|{0:<60}|'.format('[1] Cadastro de úsuario'))
+    print('|{0:<60}|'.format('[2] Login'))
+    print('|{0:<60}|'.format('[3] Deletar usuario do Firebase'))
+    print('|{}|'.format('_'*60))
+    opcao = input('')
 
-#-- Teste area de Carteira  
-#Boleto 
-navegador.find_element('xpath', carteira[0]).click() 
-#Pix 
-navegador.find_element('xpath', carteira[1]).click() 
-#Botão Proximo
-navegador.find_element('xpath', proximo).click() 
+    if opcao == 1: 
+        cadastroSucesso(0.1)
+    elif opcao == 2:
+        login()
+
+
+#cadastroSucesso(0.2)
+login(0.2)
